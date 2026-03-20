@@ -1,0 +1,13 @@
+__pycache__
+*.pyc
+.git
+.gitignore
+*.ipynb
+notebooks/
+data/raw/
+mlruns/
+.env
+*.pbix
+.claude/
+.venv/
+venv/
