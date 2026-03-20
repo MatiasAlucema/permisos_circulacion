@@ -96,6 +96,7 @@ app.add_middleware(
 
 # ── Endpoints: Prediccion ─────────────────────────────────
 
+
 @app.get("/health", response_model=HealthResponse, tags=["Sistema"])
 async def health_check():
     """Verifica el estado de la API y del modelo cargado."""
@@ -116,7 +117,9 @@ async def health_check():
 async def predict(request: PermitPredictionRequest):
     """Predice el estado de un permiso de circulacion individual."""
     if predictor is None:
-        raise HTTPException(status_code=503, detail="Modelo no disponible. Ejecute train.py primero.")
+        raise HTTPException(
+            status_code=503, detail="Modelo no disponible. Ejecute train.py primero."
+        )
 
     try:
         result = predictor.predict_single(request.model_dump())
@@ -141,7 +144,9 @@ async def predict(request: PermitPredictionRequest):
 async def predict_batch(request: BatchPredictionRequest):
     """Predice el estado de multiples permisos (max 100 por request)."""
     if predictor is None:
-        raise HTTPException(status_code=503, detail="Modelo no disponible. Ejecute train.py primero.")
+        raise HTTPException(
+            status_code=503, detail="Modelo no disponible. Ejecute train.py primero."
+        )
 
     try:
         results = predictor.predict_batch([p.model_dump() for p in request.permits])
@@ -179,7 +184,9 @@ async def predict_with_explanation(request: PermitPredictionRequest):
     **Requiere**: Variable de entorno `GEMINI_API_KEY` o `ANTHROPIC_API_KEY` configurada.
     """
     if predictor is None:
-        raise HTTPException(status_code=503, detail="Modelo no disponible. Ejecute train.py primero.")
+        raise HTTPException(
+            status_code=503, detail="Modelo no disponible. Ejecute train.py primero."
+        )
 
     try:
         result = predictor.predict_single(request.model_dump())
@@ -211,6 +218,7 @@ async def predict_with_explanation(request: PermitPredictionRequest):
 
 
 # ── Endpoints: Monitoring ─────────────────────────────────
+
 
 @app.get("/monitoring/status", tags=["Monitoring"])
 async def monitoring_status():
@@ -254,10 +262,14 @@ async def clear_monitoring():
         raise HTTPException(status_code=503, detail="Monitor no disponible.")
 
     cleared = monitor.clear_production_data()
-    return {"cleared_records": cleared, "message": f"Se eliminaron {cleared} registros de produccion."}
+    return {
+        "cleared_records": cleared,
+        "message": f"Se eliminaron {cleared} registros de produccion.",
+    }
 
 
 # ── Endpoints: Sistema ────────────────────────────────────
+
 
 @app.get("/model/info", tags=["Sistema"])
 async def model_info():

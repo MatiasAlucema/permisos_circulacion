@@ -25,6 +25,7 @@ LABELS = {0: "Activo", 1: "Inactivo"}
 @dataclass
 class PredictionResult:
     """Resultado de una predicción individual."""
+
     prediction: str
     probability_inactive: float
     probability_active: float

@@ -47,8 +47,9 @@ Reglas de negocio conocidas:
 Responde SIEMPRE en espanol y con formato estructurado."""
 
 
-def _build_user_prompt(prediction: str, probability_inactive: float,
-                       probability_active: float, features: dict) -> str:
+def _build_user_prompt(
+    prediction: str, probability_inactive: float, probability_active: float, features: dict
+) -> str:
     """Construye el prompt del usuario con los datos de la prediccion."""
     max_prob = max(probability_inactive, probability_active)
     if max_prob >= 0.75:
@@ -58,7 +59,7 @@ def _build_user_prompt(prediction: str, probability_inactive: float,
     else:
         confidence = "baja"
 
-    monto = features.get('monto_pagado', 0)
+    monto = features.get("monto_pagado", 0)
     monto_str = f"${monto:,.0f}" if isinstance(monto, (int, float)) else str(monto)
 
     return f"""Analiza esta prediccion de un permiso de circulacion:
@@ -70,14 +71,14 @@ def _build_user_prompt(prediction: str, probability_inactive: float,
 - **Confianza**: {confidence}
 
 ## Datos del permiso
-- Tipo de vehiculo: {features.get('tipo_vehiculo', 'N/A')}
-- Zona de circulacion: {features.get('zona_circulacion', 'N/A')}
-- Duracion del permiso: {features.get('duracion_dias', 'N/A')} dias
+- Tipo de vehiculo: {features.get("tipo_vehiculo", "N/A")}
+- Zona de circulacion: {features.get("zona_circulacion", "N/A")}
+- Duracion del permiso: {features.get("duracion_dias", "N/A")} dias
 - Monto pagado: {monto_str} CLP
-- Renovacion: {'Si' if features.get('renovacion') else 'No'}
-- Infracciones previas: {features.get('infracciones_previas', 'N/A')}
-- Emitido en fin de semana: {'Si' if features.get('es_fin_semana') else 'No'}
-- Antiguedad: {features.get('dias_antiguedad', 'N/A')} dias
+- Renovacion: {"Si" if features.get("renovacion") else "No"}
+- Infracciones previas: {features.get("infracciones_previas", "N/A")}
+- Emitido en fin de semana: {"Si" if features.get("es_fin_semana") else "No"}
+- Antiguedad: {features.get("dias_antiguedad", "N/A")} dias
 
 Responde con exactamente este formato:
 
@@ -97,6 +98,7 @@ Responde con exactamente este formato:
 @dataclass
 class ExplanationResult:
     """Resultado de la explicacion generada por el LLM."""
+
     explanation: str
     model_used: str
     tokens_used: int
@@ -109,8 +111,7 @@ async def _explain_with_gemini(user_prompt: str) -> ExplanationResult:
     api_key = os.getenv("GEMINI_API_KEY")
     if not api_key:
         raise ValueError(
-            "GEMINI_API_KEY no configurada. "
-            "Crea un archivo .env con: GEMINI_API_KEY=..."
+            "GEMINI_API_KEY no configurada. Crea un archivo .env con: GEMINI_API_KEY=..."
         )
 
     client = genai.Client(api_key=api_key)
@@ -123,9 +124,8 @@ async def _explain_with_gemini(user_prompt: str) -> ExplanationResult:
 
     tokens_used = 0
     if response.usage_metadata:
-        tokens_used = (
-            (response.usage_metadata.prompt_token_count or 0)
-            + (response.usage_metadata.candidates_token_count or 0)
+        tokens_used = (response.usage_metadata.prompt_token_count or 0) + (
+            response.usage_metadata.candidates_token_count or 0
         )
 
     return ExplanationResult(
@@ -186,13 +186,13 @@ async def explain_prediction(
     Returns:
         ExplanationResult con la explicacion, modelo usado y tokens consumidos.
     """
-    user_prompt = _build_user_prompt(
-        prediction, probability_inactive, probability_active, features
-    )
+    user_prompt = _build_user_prompt(prediction, probability_inactive, probability_active, features)
 
     if LLM_PROVIDER == "anthropic":
         return await _explain_with_anthropic(user_prompt)
     elif LLM_PROVIDER == "gemini":
         return await _explain_with_gemini(user_prompt)
     else:
-        raise ValueError(f"LLM_PROVIDER no soportado: '{LLM_PROVIDER}'. Usa 'gemini' o 'anthropic'.")
+        raise ValueError(
+            f"LLM_PROVIDER no soportado: '{LLM_PROVIDER}'. Usa 'gemini' o 'anthropic'."
+        )

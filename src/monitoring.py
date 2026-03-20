@@ -145,13 +145,15 @@ class DriftMonitor:
                 method = config.get("method", "unknown")
                 threshold = config.get("threshold", 0.1)
                 distance = float(m.get("value", 0.0))
-                details.append({
-                    "feature": column,
-                    "method": method,
-                    "distance": round(distance, 6),
-                    "threshold": threshold,
-                    "drift_detected": distance > threshold,
-                })
+                details.append(
+                    {
+                        "feature": column,
+                        "method": method,
+                        "distance": round(distance, 6),
+                        "threshold": threshold,
+                        "drift_detected": distance > threshold,
+                    }
+                )
 
         drifted_features = [d["feature"] for d in details if d["drift_detected"]]
 

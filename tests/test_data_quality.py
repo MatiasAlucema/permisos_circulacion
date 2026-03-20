@@ -16,6 +16,7 @@ from config.config import CLEAN_FILE, NUM_RECORDS, RAW_FILE, TIPOS_VEHICULO, ZON
 
 # --- Fixtures ---
 
+
 @pytest.fixture(scope="module")
 def raw_data():
     """Carga datos brutos."""
@@ -34,6 +35,7 @@ def clean_data():
 
 # --- Tests de datos brutos ---
 
+
 class TestRawData:
     """Validaciones sobre los datos brutos generados."""
 
@@ -43,9 +45,17 @@ class TestRawData:
 
     def test_raw_has_required_columns(self, raw_data):
         """Columnas requeridas estan presentes."""
-        required = {"id_permiso", "tipo_vehiculo", "fecha_emision",
-                     "duracion_dias", "zona_circulacion", "monto_pagado",
-                     "renovacion", "infracciones_previas", "estado"}
+        required = {
+            "id_permiso",
+            "tipo_vehiculo",
+            "fecha_emision",
+            "duracion_dias",
+            "zona_circulacion",
+            "monto_pagado",
+            "renovacion",
+            "infracciones_previas",
+            "estado",
+        }
         assert required.issubset(set(raw_data.columns))
 
     def test_raw_has_intentional_errors(self, raw_data):
@@ -55,6 +65,7 @@ class TestRawData:
 
 
 # --- Tests de datos limpios ---
+
 
 class TestCleanData:
     """Validaciones sobre los datos limpios (post-cleaning)."""

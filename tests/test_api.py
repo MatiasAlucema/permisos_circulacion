@@ -12,6 +12,7 @@ from api.main import app
 
 # --- Fixtures ---
 
+
 @pytest.fixture
 def sample_request():
     """Request de ejemplo."""
@@ -27,6 +28,7 @@ def sample_request():
 
 
 # --- Tests ---
+
 
 class TestHealthEndpoint:
     """Tests del endpoint GET /health."""
@@ -109,7 +111,9 @@ class TestBatchEndpoint:
     async def test_batch_predict(self, sample_request):
         transport = ASGITransport(app=app)
         async with AsyncClient(transport=transport, base_url="http://test") as client:
-            resp = await client.post("/predict/batch", json={"permits": [sample_request, sample_request]})
+            resp = await client.post(
+                "/predict/batch", json={"permits": [sample_request, sample_request]}
+            )
         assert resp.status_code == 200
         data = resp.json()
         assert data["total"] == 2

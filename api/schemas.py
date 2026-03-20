@@ -8,11 +8,12 @@ from pydantic import BaseModel, Field
 
 # ── Request ──────────────────────────────────────────────
 
+
 class PermitPredictionRequest(BaseModel):
     """Schema de entrada para predecir el estado de un permiso."""
 
-    tipo_vehiculo: Literal["Coche", "Moto", "Camion", "Furgoneta", "Bicicleta", "Monopatin"] = Field(
-        ..., description="Tipo de vehículo", examples=["Camion"]
+    tipo_vehiculo: Literal["Coche", "Moto", "Camion", "Furgoneta", "Bicicleta", "Monopatin"] = (
+        Field(..., description="Tipo de vehículo", examples=["Camion"])
     )
     duracion_dias: float = Field(
         ..., gt=0, le=365, description="Duración del permiso en días", examples=[15.0]
@@ -52,6 +53,7 @@ class PermitPredictionRequest(BaseModel):
 
 class BatchPredictionRequest(BaseModel):
     """Schema para predicciones en lote."""
+
     permits: list[PermitPredictionRequest] = Field(
         ..., min_length=1, max_length=100, description="Lista de permisos a predecir (máx 100)"
     )
@@ -59,31 +61,28 @@ class BatchPredictionRequest(BaseModel):
 
 # ── Response ─────────────────────────────────────────────
 
+
 class PredictionResponse(BaseModel):
     """Schema de respuesta para una predicción."""
 
     prediction: Literal["Activo", "Inactivo"] = Field(
         ..., description="Estado predicho del permiso"
     )
-    probability_inactive: float = Field(
-        ..., ge=0, le=1, description="Probabilidad de ser Inactivo"
-    )
-    probability_active: float = Field(
-        ..., ge=0, le=1, description="Probabilidad de ser Activo"
-    )
-    features_used: dict = Field(
-        ..., description="Features procesadas utilizadas por el modelo"
-    )
+    probability_inactive: float = Field(..., ge=0, le=1, description="Probabilidad de ser Inactivo")
+    probability_active: float = Field(..., ge=0, le=1, description="Probabilidad de ser Activo")
+    features_used: dict = Field(..., description="Features procesadas utilizadas por el modelo")
 
 
 class BatchPredictionResponse(BaseModel):
     """Schema de respuesta para predicciones en lote."""
+
     predictions: list[PredictionResponse]
     total: int
 
 
 class HealthResponse(BaseModel):
     """Schema de respuesta del health check."""
+
     status: str = "ok"
     model_loaded: bool
     model_type: str | None = None
@@ -97,26 +96,15 @@ class ExplainedPredictionResponse(BaseModel):
     prediction: Literal["Activo", "Inactivo"] = Field(
         ..., description="Estado predicho del permiso"
     )
-    probability_inactive: float = Field(
-        ..., ge=0, le=1, description="Probabilidad de ser Inactivo"
-    )
-    probability_active: float = Field(
-        ..., ge=0, le=1, description="Probabilidad de ser Activo"
-    )
-    features_used: dict = Field(
-        ..., description="Features procesadas utilizadas por el modelo"
-    )
-    explanation: str = Field(
-        ..., description="Explicacion en lenguaje natural generada por Claude"
-    )
-    llm_model: str = Field(
-        ..., description="Modelo de LLM utilizado para la explicacion"
-    )
-    llm_tokens_used: int = Field(
-        ..., ge=0, description="Tokens consumidos por la explicacion"
-    )
+    probability_inactive: float = Field(..., ge=0, le=1, description="Probabilidad de ser Inactivo")
+    probability_active: float = Field(..., ge=0, le=1, description="Probabilidad de ser Activo")
+    features_used: dict = Field(..., description="Features procesadas utilizadas por el modelo")
+    explanation: str = Field(..., description="Explicacion en lenguaje natural generada por Claude")
+    llm_model: str = Field(..., description="Modelo de LLM utilizado para la explicacion")
+    llm_tokens_used: int = Field(..., ge=0, description="Tokens consumidos por la explicacion")
 
 
 class ErrorResponse(BaseModel):
     """Schema de error."""
+
     detail: str

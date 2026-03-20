@@ -11,6 +11,7 @@ from src.predict import PredictionResult, get_predictor
 
 # --- Fixtures ---
 
+
 @pytest.fixture(scope="module")
 def predictor():
     """Carga el predictor una vez para todos los tests."""
@@ -46,6 +47,7 @@ def low_risk_permit():
 
 
 # --- Tests ---
+
 
 class TestPredictor:
     """Tests del predictor de permisos."""
@@ -95,9 +97,17 @@ class TestPredictor:
     def test_features_used_contains_expected_keys(self, predictor, sample_permit):
         """Las features procesadas incluyen las columnas esperadas."""
         result = predictor.predict_single(sample_permit)
-        expected = {"tipo_vehiculo", "duracion_dias", "zona_circulacion",
-                    "monto_pagado", "infracciones_previas", "mes",
-                    "dia_semana", "es_fin_semana", "dias_antiguedad"}
+        expected = {
+            "tipo_vehiculo",
+            "duracion_dias",
+            "zona_circulacion",
+            "monto_pagado",
+            "infracciones_previas",
+            "mes",
+            "dia_semana",
+            "es_fin_semana",
+            "dias_antiguedad",
+        }
         assert expected.issubset(set(result.features_used.keys()))
 
     def test_missing_feature_raises_error(self, predictor):
@@ -126,4 +136,4 @@ class TestPredictor:
         metrics = info["test_metrics"]
         assert metrics["accuracy"] > 0.5  # Mejor que random
         assert metrics["f1_score"] > 0.3  # F1 razonable
-        assert metrics["roc_auc"] > 0.5   # Mejor que random
+        assert metrics["roc_auc"] > 0.5  # Mejor que random

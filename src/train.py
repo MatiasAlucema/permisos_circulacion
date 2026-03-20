@@ -89,15 +89,21 @@ def build_pipeline(X: pd.DataFrame) -> ImbPipeline:
     preprocessor = ColumnTransformer(
         transformers=[
             ("num", StandardScaler(), num_cols),
-            ("cat", OneHotEncoder(drop="first", sparse_output=False, handle_unknown="ignore"), cat_cols),
+            (
+                "cat",
+                OneHotEncoder(drop="first", sparse_output=False, handle_unknown="ignore"),
+                cat_cols,
+            ),
         ]
     )
 
-    pipeline = ImbPipeline([
-        ("preprocessor", preprocessor),
-        ("smote", SMOTE(random_state=RANDOM_SEED)),
-        ("classifier", RandomForestClassifier(random_state=RANDOM_SEED)),
-    ])
+    pipeline = ImbPipeline(
+        [
+            ("preprocessor", preprocessor),
+            ("smote", SMOTE(random_state=RANDOM_SEED)),
+            ("classifier", RandomForestClassifier(random_state=RANDOM_SEED)),
+        ]
+    )
 
     return pipeline
 
@@ -158,8 +164,13 @@ def evaluate_model(model: ImbPipeline, X_test: pd.DataFrame, y_test: pd.Series) 
     return metrics
 
 
-def save_artifacts(model: ImbPipeline, metrics: dict, best_params: dict, best_cv_f1: float,
-                   feature_names: list[str]) -> None:
+def save_artifacts(
+    model: ImbPipeline,
+    metrics: dict,
+    best_params: dict,
+    best_cv_f1: float,
+    feature_names: list[str],
+) -> None:
     """Guarda el modelo y metadata localmente."""
     os.makedirs(MODELS_DIR, exist_ok=True)
 
@@ -209,17 +220,19 @@ def main():
 
         # Log dataset info en MLflow
         data_hash = get_data_hash(CLEAN_FILE)
-        mlflow.log_params({
-            "dataset_path": os.path.basename(CLEAN_FILE),
-            "dataset_hash_md5": data_hash,
-            "dataset_rows": X.shape[0],
-            "dataset_features": X.shape[1],
-            "target_ratio_inactive": round(y.mean(), 4),
-            "random_seed": RANDOM_SEED,
-            "test_size": TEST_SIZE,
-            "cv_folds": N_SPLITS_CV,
-            "balancing_method": "SMOTE",
-        })
+        mlflow.log_params(
+            {
+                "dataset_path": os.path.basename(CLEAN_FILE),
+                "dataset_hash_md5": data_hash,
+                "dataset_rows": X.shape[0],
+                "dataset_features": X.shape[1],
+                "target_ratio_inactive": round(y.mean(), 4),
+                "random_seed": RANDOM_SEED,
+                "test_size": TEST_SIZE,
+                "cv_folds": N_SPLITS_CV,
+                "balancing_method": "SMOTE",
+            }
+        )
 
         # ── 2. Split ───────────────────────────────────────
         X_train, X_test, y_train, y_test = train_test_split(
@@ -227,10 +240,12 @@ def main():
         )
         print(f"  Train: {X_train.shape[0]}, Test: {X_test.shape[0]}")
 
-        mlflow.log_params({
-            "train_size": X_train.shape[0],
-            "test_size_n": X_test.shape[0],
-        })
+        mlflow.log_params(
+            {
+                "train_size": X_train.shape[0],
+                "test_size_n": X_test.shape[0],
+            }
+        )
 
         # ── 3. Construir y optimizar pipeline ──────────────
         print("\n[2/5] Construyendo pipeline y optimizando hiperparametros...")

@@ -135,15 +135,9 @@ class SHAPExplainer:
         )
 
         # Top features que empujan hacia Inactivo (positivas) y Activo (negativas)
-        top_positive = [
-            {"feature": f, "contribution": v}
-            for f, v in sorted_features if v > 0
-        ][:5]
+        top_positive = [{"feature": f, "contribution": v} for f, v in sorted_features if v > 0][:5]
 
-        top_negative = [
-            {"feature": f, "contribution": v}
-            for f, v in sorted_features if v < 0
-        ][:5]
+        top_negative = [{"feature": f, "contribution": v} for f, v in sorted_features if v < 0][:5]
 
         return {
             "shap_values": feature_contributions,
@@ -186,9 +180,7 @@ class SHAPExplainer:
             importance[name] = round(float(val), 6)
 
         # Ordenar por importancia
-        sorted_importance = dict(
-            sorted(importance.items(), key=lambda x: x[1], reverse=True)
-        )
+        sorted_importance = dict(sorted(importance.items(), key=lambda x: x[1], reverse=True))
 
         return {
             "feature_importance": sorted_importance,

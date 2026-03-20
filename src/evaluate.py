@@ -124,6 +124,7 @@ def main():
     # Preparar datos de test (misma logica que train.py)
     print("[1/2] Cargando datos de test...")
     from sklearn.model_selection import train_test_split
+
     X, y = load_and_prepare_data()
     _, X_test, _, y_test = train_test_split(
         X, y, test_size=TEST_SIZE, random_state=RANDOM_SEED, stratify=y
