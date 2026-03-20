@@ -1,0 +1,33 @@
+[project]
+name = "permisos-circulacion"
+version = "3.0.0"
+description = "Prediccion de estado de permisos de circulacion - AI & Data Engineering"
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+asyncio_mode = "auto"
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "N",   # pep8-naming
+    "UP",  # pyupgrade
+]
+ignore = [
+    "E501",  # line too long (manejado por formatter)
+    "N806",  # variable in function should be lowercase (X_train es comun en ML)
+    "N803",  # argument name should be lowercase (X, y son comunes en ML)
+    "UP007", # use X | Y for union types (mantener Optional por compatibilidad)
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["src", "api", "config"]
