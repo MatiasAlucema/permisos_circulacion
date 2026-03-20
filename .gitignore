@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Data (regenerable)
+data/raw/
+data/processed/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Model artifacts (regenerable con train.py)
+models/*.joblib
+models/features.txt
+
+# MLflow experiments (regenerable, ver con: mlflow ui)
+mlruns/
+mlflow.db
+
+# Environment
+.env
+.env.local
