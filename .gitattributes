@@ -1,0 +1,3 @@
+# Excluir notebooks de las estadísticas de lenguaje de GitHub
+# El valor del proyecto está en el código Python de producción (src/, api/, tests/)
+*.ipynb linguist-vendored
