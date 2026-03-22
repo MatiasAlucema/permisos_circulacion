@@ -120,6 +120,7 @@ async def _explain_with_gemini(user_prompt: str) -> ExplanationResult:
     response = client.models.generate_content(
         model=model_name,
         contents=f"{SYSTEM_PROMPT}\n\n{user_prompt}",
+        config={"max_output_tokens": 512},
     )
 
     tokens_used = 0
@@ -165,6 +166,50 @@ async def _explain_with_anthropic(user_prompt: str) -> ExplanationResult:
     )
 
 
+def _generate_fallback_explanation(
+    prediction: str,
+    probability_inactive: float,
+    probability_active: float,
+    features: dict,
+) -> ExplanationResult:
+    """Genera una explicacion basica sin LLM (fallback cuando no hay API key o se agotan tokens)."""
+    max_prob = max(probability_inactive, probability_active)
+    confidence = "alta" if max_prob >= 0.75 else "moderada" if max_prob >= 0.60 else "baja"
+
+    factores = []
+    infracciones = features.get("infracciones_previas", 0)
+    if infracciones and infracciones > 0:
+        factores.append(f"- {infracciones} infracciones previas (factor de riesgo principal)")
+    if features.get("tipo_vehiculo") in ("Monopatin", "Camion"):
+        factores.append(f"- Tipo de vehiculo: {features['tipo_vehiculo']} (mayor regulacion)")
+    if features.get("zona_circulacion") == "Zona A" and features.get("tipo_vehiculo") == "Camion":
+        factores.append("- Camion en Zona A (zona con restricciones especiales)")
+    if features.get("es_fin_semana"):
+        factores.append("- Emitido en fin de semana (mayor riesgo historico)")
+    if not features.get("renovacion"):
+        factores.append("- Primera emision (sin historial de renovacion)")
+    if not factores:
+        factores.append("- Sin factores de riesgo significativos detectados")
+
+    factores_str = "\n".join(factores)
+    explanation = f"""### Explicacion
+El modelo predice estado **{prediction}** con confianza {confidence} ({max_prob:.1%}). \
+La prediccion se basa en el analisis combinado de las caracteristicas del permiso.
+
+### Factores de riesgo
+{factores_str}
+
+### Recomendacion
+{"Revisar manualmente este permiso dadas las senales de riesgo." if prediction == "Inactivo" else "Permiso sin senales de alerta significativas. Procesamiento normal."}
+
+### Nivel de confianza
+Confianza {confidence} ({max_prob:.1%}). {"Considerar revision adicional." if confidence == "baja" else ""}"""
+
+    return ExplanationResult(
+        explanation=explanation, model_used="fallback-rule-based", tokens_used=0
+    )
+
+
 async def explain_prediction(
     prediction: str,
     probability_inactive: float,
@@ -177,22 +222,22 @@ async def explain_prediction(
     - LLM_PROVIDER=gemini  (default) -> usa Google Gemini
     - LLM_PROVIDER=anthropic         -> usa Claude (Anthropic)
 
-    Args:
-        prediction: "Activo" o "Inactivo"
-        probability_inactive: Probabilidad de ser inactivo (0-1)
-        probability_active: Probabilidad de ser activo (0-1)
-        features: Dict con las features del permiso
-
-    Returns:
-        ExplanationResult con la explicacion, modelo usado y tokens consumidos.
+    Si el LLM falla (tokens agotados, API key invalida, etc.), genera
+    una explicacion basica con reglas de negocio como fallback.
     """
     user_prompt = _build_user_prompt(prediction, probability_inactive, probability_active, features)
 
-    if LLM_PROVIDER == "anthropic":
-        return await _explain_with_anthropic(user_prompt)
-    elif LLM_PROVIDER == "gemini":
-        return await _explain_with_gemini(user_prompt)
-    else:
-        raise ValueError(
-            f"LLM_PROVIDER no soportado: '{LLM_PROVIDER}'. Usa 'gemini' o 'anthropic'."
+    try:
+        if LLM_PROVIDER == "anthropic":
+            return await _explain_with_anthropic(user_prompt)
+        elif LLM_PROVIDER == "gemini":
+            return await _explain_with_gemini(user_prompt)
+        else:
+            raise ValueError(
+                f"LLM_PROVIDER no soportado: '{LLM_PROVIDER}'. Usa 'gemini' o 'anthropic'."
+            )
+    except Exception as e:
+        print(f"[LLM FALLBACK] Error con {LLM_PROVIDER}: {e}")
+        return _generate_fallback_explanation(
+            prediction, probability_inactive, probability_active, features
         )

@@ -39,10 +39,8 @@ jobs:
       - name: Generate data
         run: python src/data_generation.py
 
-      - name: Run cleaning notebook as script
-        run: |
-          pip install nbconvert
-          jupyter nbconvert --to script notebooks/02_data_validation_cleaning.ipynb --stdout | python
+      - name: Clean data
+        run: python src/data_cleaning.py
 
       - name: Train model
         run: python src/train.py
@@ -65,7 +63,7 @@ jobs:
         run: |
           pip install -r requirements.txt
           python src/data_generation.py
-          jupyter nbconvert --to script notebooks/02_data_validation_cleaning.ipynb --stdout | python
+          python src/data_cleaning.py
           python src/train.py
 
       - name: Build Docker image
